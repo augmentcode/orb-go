@@ -10,6 +10,9 @@ type UnionVariant struct {
 	TypeFilter         gjson.Type
 	DiscriminatorValue interface{}
 	Type               reflect.Type
+	// CustomMatcher is an optional function that can be used for custom matching logic
+	// If provided, it takes precedence over TypeFilter and DiscriminatorValue
+	CustomMatcher func([]byte) bool
 }
 
 var unionRegistry = map[reflect.Type]unionEntry{}

@@ -219,6 +219,18 @@ func (d *decoderBuilder) newUnionDecoder(t reflect.Type) decoderFunc {
 		// If there is a discriminator match, circumvent the exactness logic entirely
 		for idx, variant := range unionEntry.variants {
 			decoder := decoders[idx]
+
+			// Check custom matcher first
+			if variant.CustomMatcher != nil {
+				if variant.CustomMatcher([]byte(n.Raw)) {
+					inner := reflect.New(variant.Type).Elem()
+					err := decoder(n, inner, state)
+					v.Set(inner)
+					return err
+				}
+				continue
+			}
+
 			if variant.TypeFilter != n.Type {
 				continue
 			}

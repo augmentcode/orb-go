@@ -5277,12 +5277,15 @@ func init() {
 		reflect.TypeOf((*SubscriptionUsageUnion)(nil)).Elem(),
 		"",
 		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SubscriptionUsageUngroupedSubscriptionUsage{}),
+			Type: reflect.TypeOf(SubscriptionUsageGroupedSubscriptionUsage{}),
+			CustomMatcher: func(data []byte) bool {
+				// Use grouped variant if metric_group field exists in any data element
+				return gjson.GetBytes(data, "data.0.metric_group").Exists()
+			},
 		},
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SubscriptionUsageGroupedSubscriptionUsage{}),
+			Type:       reflect.TypeOf(SubscriptionUsageUngroupedSubscriptionUsage{}),
 		},
 	)
 }
