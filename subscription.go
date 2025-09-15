@@ -5276,13 +5276,20 @@ func init() {
 	apijson.RegisterUnion(
 		reflect.TypeOf((*SubscriptionUsageUnion)(nil)).Elem(),
 		"",
-		apijson.UnionVariant{
-			TypeFilter: gjson.JSON,
-			Type:       reflect.TypeOf(SubscriptionUsageUngroupedSubscriptionUsage{}),
-		},
+		// Prefer the grouped variant when both variants appear equally exact.
+		// With both TypeFilters as gjson.JSON and no discriminator, the union
+		// resolver breaks ties left-to-right. Grouped responses include a
+		// `metric_group` field on each data element, which would otherwise be
+		// treated as an extra field by the ungrouped type, causing the ungrouped
+		// variant to win incorrectly. Listing the grouped variant first ensures
+		// grouped responses select the grouped type so metric_group is preserved.
 		apijson.UnionVariant{
 			TypeFilter: gjson.JSON,
 			Type:       reflect.TypeOf(SubscriptionUsageGroupedSubscriptionUsage{}),
+		},
+		apijson.UnionVariant{
+			TypeFilter: gjson.JSON,
+			Type:       reflect.TypeOf(SubscriptionUsageUngroupedSubscriptionUsage{}),
 		},
 	)
 }
